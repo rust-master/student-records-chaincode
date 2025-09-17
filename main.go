@@ -67,6 +67,31 @@ func (s *SmartContract) UpdateGPA(ctx contractapi.TransactionContextInterface, i
 	return ctx.GetStub().PutState(id, updatedStudentJSON)
 }
 
+func (s *SmartContract) UpdateName(ctx contractapi.TransactionContextInterface, id string, name string) error {
+	studentJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if studentJSON == nil {
+		return fmt.Errorf("student with ID %s does not exist", id)
+	}
+
+	var student Student
+	err = json.Unmarshal(studentJSON, &student)
+	if err != nil {
+		return err
+	}
+
+	student.Name = name
+
+	updatedStudentJSON, err := json.Marshal(student)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, updatedStudentJSON)
+}
+
 func (s *SmartContract) QueryStudent(ctx contractapi.TransactionContextInterface, id string) (*Student, error) {
 	studentJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
